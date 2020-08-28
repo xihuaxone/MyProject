@@ -1,0 +1,11 @@
+docker login --username=xihuaxxone registry.cn-hangzhou.aliyuncs.com
+
+cat ~/.docker/config.json
+
+docker tag {{ImageId}} registry.cn-hangzhou.aliyuncs.com/xihua/my_project:{{image version}}
+
+docker push registry.cn-hangzhou.aliyuncs.com/xihua/my_project:{{image version}}
+
+docker pull registry.cn-hangzhou.aliyuncs.com/xihua/my_project:{{image version}}
+
+
