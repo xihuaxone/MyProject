@@ -1,12 +1,15 @@
+import os
 import requests
+from settings.global_config import Service
 
 
 def test_api():
     """
     test api after server deploy;
     """
-    url = 'http://127.0.0.1:8080/'
-    res = requests.get(url)
+    url = os.path.join(Service.endpoint, '')
+    print(url)
+    res = requests.get(url, timeout=10)
     print(res.content)
 
 

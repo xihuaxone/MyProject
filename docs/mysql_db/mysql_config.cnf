@@ -1,0 +1,10 @@
+[mysqldump]
+user=root
+password='13241324'
+
+[mysqld]
+max_allowed_packet=8M
+lower_case_table_names=1
+character_set_server=utf8
+max_connections=100
+max_connect_errors=100
