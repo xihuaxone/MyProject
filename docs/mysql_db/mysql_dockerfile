@@ -5,6 +5,7 @@ ENV PATH /home/xihua:$PATH
 
 COPY ./mysql_config.cnf /etc/mysql/conf.d/mysql_config.cnf
 
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
 WORKDIR /home/xihua
 
