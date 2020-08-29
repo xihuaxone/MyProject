@@ -1,1 +1,5 @@
 mysqldump -h 127.0.0.1 -u root -p my_project  > mysql_202002291644.sql
+
+docker build -f ./mysql_dockerfile -t mysql5.7:{{version}} .
+
+sudo docker run -p 3306:3306 --net=host --name=mysql5.7 -v /usr/local/my_project/mysql_db/:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=***** -d {{image id}}
