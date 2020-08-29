@@ -17,7 +17,7 @@ class ControllerBase(object):
         if not isinstance(filter_dict, dict):
             raise Exception('param filter is not dict.')
         filter_params = []
-        for k, v in filter_dict:
+        for k, v in filter_dict.items():
             if k.endswith('.in_'):
                 part_filter = getattr(self.table_cls, k).in_(v)
             elif k.endswith('.like'):
@@ -40,15 +40,20 @@ class ControllerBase(object):
         with singleton_session() as session:
             query_obj = session.query(self.table_cls).filter(*filter_params)
             query_method = kwargs.get('query_method', 'all')
-            return getattr(query_obj, query_method)()
+            info = getattr(query_obj, query_method)()
+            if isinstance(info, list):
+                info = [i.dict_format() for i in info]
+            else:
+                info = info.dict_format()
+            return info
 
     def _add(self, add_dict):
         with singleton_session() as session:
             instance = self.table_cls(**add_dict)
             session.add(instance)
-        return instance
+        return instance.dict_format()
 
-    def update(self, query_dict, update_dict):
+    def _update(self, query_dict, update_dict):
         with singleton_session() as session:
             filter_params = [getattr(self.table_cls, k) == v
                              for k, v in query_dict.items()]
@@ -59,5 +64,5 @@ class ControllerBase(object):
                 for k, v in update_dict.items():
                     setattr(instance, k, v)
 
-        return instance_list
+        return [ins.dict_format() for ins in instance_list]
 
