@@ -8,3 +8,4 @@ lower_case_table_names=1
 character_set_server=utf8
 max_connections=100
 max_connect_errors=100
+default-time_zone = '+8:00'

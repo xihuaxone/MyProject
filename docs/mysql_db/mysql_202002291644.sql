@@ -31,7 +31,7 @@ CREATE TABLE `user_info` (
   `time_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `identify_keys` (`identify_type`,`identify_code`,`identify_psw`) USING HASH COMMENT '用户登录信息索引，hash索引，仅支持精准查询；'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,6 +40,7 @@ CREATE TABLE `user_info` (
 
 LOCK TABLES `user_info` WRITE;
 /*!40000 ALTER TABLE `user_info` DISABLE KEYS */;
+INSERT INTO `user_info` VALUES (1,1,'test','test_pwd','2020-08-29 12:59:08','2020-08-29 12:59:08');
 /*!40000 ALTER TABLE `user_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -61,7 +62,7 @@ CREATE TABLE `user_info_base` (
   `time_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `user_contact_info` (`user_name`,`phone`,`email`) USING BTREE COMMENT '索引'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,6 +71,7 @@ CREATE TABLE `user_info_base` (
 
 LOCK TABLES `user_info_base` WRITE;
 /*!40000 ALTER TABLE `user_info_base` DISABLE KEYS */;
+INSERT INTO `user_info_base` VALUES (1,11111,'xihuaxone','xihua',NULL,NULL,'2020-08-29 17:08:26','2020-08-29 17:08:26');
 /*!40000 ALTER TABLE `user_info_base` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -82,4 +84,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-08-29 16:53:25
+-- Dump completed on 2020-08-30  1:49:47

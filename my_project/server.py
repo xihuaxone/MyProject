@@ -1,12 +1,11 @@
 import logging
 import os
 import signal
-import time
 
 import tornado.ioloop
 import tornado.web
 
-from handlers.urls import url_list
+from views.urls import url_list
 
 
 def init_log(level, stream=True, file=True, file_path='./logs/', log_name='tornado_log.log'):
