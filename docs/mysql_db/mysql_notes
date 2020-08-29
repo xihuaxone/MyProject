@@ -1,0 +1,1 @@
+mysqldump -h 127.0.0.1 -u root -p my_project  > mysql_202002291644.sql
