@@ -7,12 +7,8 @@ COPY . /MyProject
 
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 RUN yum install -y python3
-RUN yum install -y wget lftp gcc gcc-c++ make openssl-devel pcre-devel pcre && yum clean all
-RUN pip3 install tornado==6.0.4
-RUN pip3 install requests==2.24.0
-RUN pip3 install urllib3==1.25.10
-RUN pip3 install SQLAlchemy==1.3.19
-RUN pip3 install mysqlclient==2.0.1
+RUN yum install -y yum install gcc python3-devel mysql-devel
+RUN pip3 install --user -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com -r /MyProject/requirements
 
 WORKDIR /MyProject/my_project
 
