@@ -44,7 +44,7 @@ class ControllerBase(object):
             if isinstance(info, list):
                 info = [i.dict_format() for i in info]
             else:
-                info = info.dict_format()
+                info = info.dict_format() if info else None
             return info
 
     def _add(self, add_dict):

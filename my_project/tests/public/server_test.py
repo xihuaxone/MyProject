@@ -3,21 +3,30 @@ import os
 import requests
 from settings.global_config import Service
 
+import unittest
 
-def test_api():
-    """
-    test api after server deploy;
-    """
+
+class TestUserHandler(unittest.TestCase):
     url = os.path.join(Service.endpoint, 'user')
-    print(url)
-    data = {
-        'user_id': 11111,
-        'user_name': 'xihua',
-        'login_name': 'xihuaxone'
-    }
-    res = requests.get(url, data=json.dumps(data), timeout=10)
-    print(res.content)
+
+    def test_user_post(self):
+        data = {
+            'user_id': 11112,
+            'user_name': 'xihua2',
+            'login_name': 'xihuatwo'
+        }
+        res = requests.post(self.url, data=json.dumps(data), timeout=10)
+        print('post resp: %s' % res.content)
+
+    def test_user_get(self):
+        params = {
+            'user_id': 11112,
+            'user_name': 'xihua2',
+            'login_name': 'xihuatwo'
+        }
+        res = requests.get(self.url, params=params, timeout=10)
+        print('get resp: %s' % res.content)
 
 
 if __name__ == '__main__':
-    test_api()
+    unittest.main()
