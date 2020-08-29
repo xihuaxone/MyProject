@@ -19,7 +19,6 @@ class UserInfo(Base):
     time_modified = Column(DateTime, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"), comment='修改时间')
 
 
-
 class UserInfoBase(Base):
     __tablename__ = 'user_info_base'
     __table_args__ = (
