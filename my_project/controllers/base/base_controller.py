@@ -18,22 +18,18 @@ class ControllerBase(object):
             raise Exception('param filter is not dict.')
         filter_params = []
         for k, v in filter_dict.items():
-            if k.endswith('.in_'):
-                part_filter = getattr(self.table_cls, k).in_(v)
-            elif k.endswith('.like'):
-                part_filter = getattr(self.table_cls, k).like(v)
-            elif k.endswith('.notin_'):
-                part_filter = getattr(self.table_cls, k).notin_(v)
-            elif k.endswith('.gt_'):
-                part_filter = getattr(self.table_cls, k).gt_(v)
-            elif k.endswith('.lt_'):
-                part_filter = getattr(self.table_cls, k).lt_(v)
-            elif k.endswith('.ge_'):
-                part_filter = getattr(self.table_cls, k).ge_(v)
-            elif k.endswith('.le_'):
-                part_filter = getattr(self.table_cls, k).le_(v)
+            k_operator = k.split('.')
+            if len(k_operator) == 2:
+                k, operator = k_operator
+                part_filter = getattr(getattr(self.table_cls, k), operator)(v)
+            elif len(k_operator) == 1:
+                k = k_operator[0]
+                if k.startswith('^'):
+                    part_filter = getattr(self.table_cls, k) != v
+                else:
+                    part_filter = getattr(self.table_cls, k) == v
             else:
-                part_filter = getattr(self.table_cls, k) == v
+                raise Exception('illegal key: [%s]' % k)
 
             filter_params.append(part_filter)
 

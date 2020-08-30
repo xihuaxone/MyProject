@@ -5,13 +5,9 @@ from models.public.user_model import UserInfoBase, UserInfo
 
 
 class UserInfoBaseController(ControllerBase):
-    def get(self, user_id=None, login_name=None,
-            user_name=None, email=None, phone=None, get_list=False):
-        params = locals()
-        params.pop('self')
-        get_list = params.pop('get_list')
+    def get(self, user_info_base, get_list=False):
         query_method = 'all' if get_list else 'one_or_none'
-        filter_dict = {k: v.strip() for k, v in params.items() if v}
+        filter_dict = {k: v.strip() for k, v in user_info_base.items() if v}
         info = self._get(filter_dict, query_method=query_method)
         return self.format_return(True, '', info)
 
