@@ -1,12 +1,11 @@
 [my_project_db]
-host = 106.14.76.56
-port = 3306
-user_name = root
-passwd = 13241324
+host = {{host}}
+port = {{port}}
+user_name = {{user_name}}
+passwd = {{passwd}}
 db_name = my_project
 charset = utf8
-log_level=
+log_level =
 
 [my_project_service]
-#endpoint = http://127.0.0.1:8080
-endpoint = http://106.14.76.56:8080
+endpoint = {{endpoint}}
