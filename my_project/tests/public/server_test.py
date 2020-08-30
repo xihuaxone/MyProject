@@ -1,13 +1,14 @@
 import json
 import os
 import requests
-from settings.global_config import Service
 
 import unittest
 
+from settings.service_settings import MyProjectService
+
 
 class TestUserHandler(unittest.TestCase):
-    url = os.path.join(Service.endpoint, 'user')
+    url = os.path.join(MyProjectService.endpoint, 'user')
 
     def test_user_post(self):
         data = {

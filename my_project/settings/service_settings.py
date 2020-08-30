@@ -1,12 +1,16 @@
-class MyProjectDb(object):
-    log_level = False
+from settings import global_config
 
-    host = '106.14.76.56'
-    port = 3306
-    db_name = 'my_project'
-    user = 'root'
-    passwd = '13241324'
-    charset = 'utf8'
+
+class MyProjectDb(object):
+    _config = global_config.get_section('my_project_db')
+
+    log_level = _config.get('log_level')
+    host = _config.get('host')
+    port = int(_config.get('port'))
+    db_name = _config.get('db_name')
+    user = _config.get('user')
+    passwd = _config.get('passwd')
+    charset = _config.get('charset')
 
     pool_recycle = 120
     pool_size = 20
@@ -19,8 +23,12 @@ class MyProjectDb(object):
     elif log_level == 'DEBUG':
         echo = 'debug'
         echo_pool = 'debug'
-    elif not log_level:
+    else:
         echo = False
         echo_pool = False
-    else:
-        raise Exception('log level not allowed.')
+
+
+class MyProjectService(object):
+    _config = global_config.get_section('my_project_service')
+
+    endpoint = _config.get('endpoint')
