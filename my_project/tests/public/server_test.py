@@ -15,7 +15,7 @@ class TestUserHandler(unittest.TestCase):
             'user_name': 'xihua2',
             'login_name': 'xihuatwo'
         }
-        res = requests.post(self.url, data=json.dumps(data), timeout=10)
+        res = requests.post(self.url, data=data, timeout=10)
         print('post resp: %s' % res.content)
 
     def test_user_get(self):

@@ -1,10 +1,10 @@
 class MyProjectDb(object):
     log_level = False
 
-    host = '127.0.0.1'
+    host = '106.14.76.56'
     port = 3306
     db_name = 'my_project'
-    user = 'xihua'
+    user = 'root'
     passwd = '13241324'
     charset = 'utf8'
 

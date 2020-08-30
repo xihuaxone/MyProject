@@ -16,7 +16,7 @@ class UserHandler(HandlerBase):
         except Exception as err:
             logger.error('get user_info_base error: %s'
                          % traceback.format_exc(10))
-            self.write(None, success=False, code=1000, msg=err)
+            self.write(None, success=False, code=1000, msg=str(err))
             return
 
         logger.info('query result: %s' % resp)
@@ -39,7 +39,7 @@ class UserHandler(HandlerBase):
         except Exception as err:
             logger.error('add user info failed. detail: %s'
                          % traceback.format_exc(10))
-            self.write(None, success=False, code=1000, msg=err)
+            self.write(None, success=False, code=1000, msg=str(err))
             return
 
         if not resp.get('success'):
