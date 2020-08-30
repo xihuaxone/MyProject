@@ -2,3 +2,4 @@ venv
 .dockerignore
 dockerfile
 README.md
+my_project/settings/global_config.cnf

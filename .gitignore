@@ -128,4 +128,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# /my_project/settings/global_config.cnf
+/my_project/settings/global_config.cnf
