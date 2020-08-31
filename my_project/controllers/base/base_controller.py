@@ -1,9 +1,27 @@
-from models.base.base import singleton_session
+import traceback
+from contextlib import contextmanager
+from sqlalchemy.orm import scoped_session
+from models.base.base import Session
+import logging as logger
+
+
+@contextmanager
+def singleton_session():
+    s = scoped_session(Session)()
+    yield s
+    try:
+        s.commit()
+    except:
+        logger.error('session commit failed. detail: %s'
+                     % traceback.format_exc(10))
+    finally:
+        s.close()
 
 
 class ControllerBase(object):
     def __init__(self, table_cls):
         self.table_cls = table_cls
+        self.scoped_session = singleton_session
 
     @staticmethod
     def format_return(success, msg, info, **kwargs):
@@ -33,24 +51,24 @@ class ControllerBase(object):
 
             filter_params.append(part_filter)
 
-        with singleton_session() as session:
+        with self.scoped_session() as session:
             query_obj = session.query(self.table_cls).filter(*filter_params)
             query_method = kwargs.get('query_method', 'all')
             info = getattr(query_obj, query_method)()
-            if isinstance(info, list):
-                info = [i.dict_format() for i in info]
-            else:
-                info = info.dict_format() if info else None
-            return info
+        if isinstance(info, list):
+            info = [i.dict_format() for i in info]
+        else:
+            info = info.dict_format() if info else None
+        return info
 
     def _add(self, add_dict):
-        with singleton_session() as session:
+        with self.scoped_session() as session:
             instance = self.table_cls(**add_dict)
             session.add(instance)
         return instance.dict_format()
 
     def _update(self, query_dict, update_dict):
-        with singleton_session() as session:
+        with self.scoped_session() as session:
             filter_params = [getattr(self.table_cls, k) == v
                              for k, v in query_dict.items()]
 
@@ -64,10 +82,12 @@ class ControllerBase(object):
 
 
 class ViewControllerBase(object):
-    def __init__(self, table_cls_list):
-        self.table_cls_list = table_cls_list
+    def __init__(self, table_cls_list, condition_list):
         self.tab_cls_map = {getattr(t_cls, '__tablename__'): t_cls
                             for t_cls in table_cls_list}
+
+        self.session = Session()
+        self.view = self._gen_view(condition_list)
 
     @staticmethod
     def format_return(success, msg, info, **kwargs):
@@ -77,7 +97,7 @@ class ViewControllerBase(object):
         ret.update(kwargs)
         return ret
 
-    def _gen_view(self, session, condition_list):
+    def _gen_view(self, condition_list):
         # TODO test;
         # condition_list = [{'tab1.id': 'tab2.union_id', 'tab1.user_name': 'tab2.name'}, {'tab2.id': 'tab3.union_id'}]
         _condition_list = []
@@ -85,7 +105,7 @@ class ViewControllerBase(object):
         _loop_counter = 0
         while True:
             _loop_counter += 1
-            if len(_condition_list) == len(condition_list):
+            if len(condition_list) == 0:
                 break
             if _loop_counter >= 10:
                 raise Exception('max loop deepth reached, '
@@ -93,7 +113,9 @@ class ViewControllerBase(object):
                                 % condition_list)
 
             for condition in condition_list:
-                l_tab, r_tab = [i.split('.')[0] for i in condition.popitem()]
+                demo = condition.popitem()
+                l_tab, r_tab = [i.split('.')[0] for i in demo]
+                condition.update({demo[0]: demo[1]})
                 if not _condition_list:
                     ordered_tables.extend([l_tab, r_tab])
                 if l_tab in ordered_tables or r_tab in ordered_tables:
@@ -118,15 +140,17 @@ class ViewControllerBase(object):
                 join_operator.append(getattr(l_cls, l_param) == getattr(r_cls, r_param))
 
             if not view:
-                view = session.query(l_cls)
+                view = self.session.query(l_cls)
                 joined_tabs.extend([l_tab, r_tab])
+            if l_tab not in joined_tabs and r_tab not in joined_tabs:
+                raise Exception('condition not related to '
+                                'any other tables: %s' % condition)
             if l_tab not in joined_tabs:
                 view = view.join(l_cls, *join_operator)
             elif r_tab not in joined_tabs:
                 view = view.join(r_cls, *join_operator)
             else:
-                raise Exception('condition not related to '
-                                'any other tables: %s' % condition)
+                pass
 
             joined_tabs.extend([l_tab, r_tab])
 

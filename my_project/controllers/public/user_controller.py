@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from controllers.base.base_controller import ControllerBase
+from controllers.base.base_controller import ControllerBase, ViewControllerBase
 from models.public.user_model import UserInfoBase, UserInfo
 
 
 class UserInfoBaseController(ControllerBase):
+    def __init__(self):
+        super(UserInfoBaseController, self).__init__(UserInfoBase)
+
     def get(self, user_info_base, get_list=False):
         query_method = 'all' if get_list else 'one_or_none'
         filter_dict = {k: v.strip() for k, v in user_info_base.items() if v}
@@ -38,6 +41,9 @@ class UserInfoBaseController(ControllerBase):
 
 
 class UserInfoController(ControllerBase):
+    def __init__(self):
+        super(UserInfoController, self).__init__(UserInfo)
+
     def get(self, user_id=None):
         info = self._get({'user_id': user_id}, query_method='one_or_none')
         return self.format_return(True, '', info)
@@ -57,5 +63,22 @@ class UserInfoController(ControllerBase):
             return self.format_return(True, '', info)
 
 
-user_info_base_ctr = UserInfoBaseController(UserInfoBase)
-user_info_ctr = UserInfoBaseController(UserInfo)
+class UserCollector(ViewControllerBase):
+    def __init__(self):
+        super(UserCollector, self).__init__([UserInfo, UserInfoBase], [{'user_info.id': 'user_info_base.user_id'}])
+
+    def get(self, user_info_base):
+        pass
+
+    def update(self):
+        pass
+
+    def add(self):
+        pass
+
+    def delete(self):
+        pass
+
+
+user_info_base_ctr = UserInfoBaseController()
+user_info_ctr = UserInfoBaseController()
