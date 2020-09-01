@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-
-from controllers.base.base_controller import ControllerBase, ViewControllerBase
+import logging as logger
+from controllers.base.base_controller import ControllerBase
+from models.base.base import Session
 from models.public.user_model import UserInfoBase, UserInfo
 
 
 class UserInfoBaseController(ControllerBase):
     def __init__(self):
-        super(UserInfoBaseController, self).__init__(UserInfoBase)
+        super(UserInfoBaseController, self).__init__(UserInfoBase, Session())
 
     def get(self, user_info_base, get_list=False):
         query_method = 'all' if get_list else 'one_or_none'
@@ -42,7 +43,7 @@ class UserInfoBaseController(ControllerBase):
 
 class UserInfoController(ControllerBase):
     def __init__(self):
-        super(UserInfoController, self).__init__(UserInfo)
+        super(UserInfoController, self).__init__(UserInfo, Session())
 
     def get(self, user_id=None):
         info = self._get({'user_id': user_id}, query_method='one_or_none')
@@ -63,15 +64,39 @@ class UserInfoController(ControllerBase):
             return self.format_return(True, '', info)
 
 
-class UserCollector(ViewControllerBase):
+class UserCollector(ControllerBase):
     def __init__(self):
-        super(UserCollector, self).__init__([UserInfo, UserInfoBase], [{'user_info.id': 'user_info_base.user_id'}])
+        super(UserCollector, self).__init__([UserInfoBase, UserInfo], Session())
 
     def get(self, user_info_base):
-        pass
+        info = self._get(user_info_base, 'user_info')
+        return self.format_return(True, '', info)
 
-    def update(self):
-        pass
+    def update_user_info(self, user_id, update_info):
+        info_base_columns = self.get_table_keys('user_info_base')
+        info_identify_columns = self.get_table_keys('user_info')
+        user_base_info = {k: update_info.pop(k) for k in info_base_columns
+                          if k in update_info}
+        identify_info = {k: update_info.pop(k) for k in info_identify_columns
+                         if k in update_info}
+
+        if update_info:
+            logger.warning('some update info not used: %s' % update_info)
+
+        if not self._get({'user_id': user_id}, 'user_info_base'):
+            return self.format_return(
+                False, 'user id [%s] not exists' % user_id)
+        info = {}
+        try:
+            info['user_info_base'] = self._update({'user_id': user_id},
+                                                  user_base_info, 'user_info_base')
+
+            info['user_info'] = self._update({'id': user_id},
+                                             identify_info, 'user_info')
+            self.commit()
+        except Exception as err:
+            return self.format_return(False, str(err))
+        return self.format_return(True, '', info)
 
     def add(self):
         pass
@@ -82,3 +107,4 @@ class UserCollector(ViewControllerBase):
 
 user_info_base_ctr = UserInfoBaseController()
 user_info_ctr = UserInfoBaseController()
+user_ctr = UserCollector()
