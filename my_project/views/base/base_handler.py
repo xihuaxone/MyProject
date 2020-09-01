@@ -15,7 +15,7 @@ class HandlerBase(tornado.web.RequestHandler, ABC):
         pass
 
     def on_finish(self):
-        pass
+        self.db_session.close()
 
     def set_default_headers(self):
         pass
