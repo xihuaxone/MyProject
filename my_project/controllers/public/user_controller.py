@@ -73,11 +73,12 @@ class UserCollector(ControllerBase):
         return self.format_return(True, '', info)
 
     def update_user_info(self, user_id, update_info):
-        info_base_columns = self.get_table_keys('user_info_base')
-        info_identify_columns = self.get_table_keys('user_info')
-        user_base_info = {k: update_info.pop(k) for k in info_base_columns
+        user_base_info = {k: update_info.pop(k)
+                          for k in self.get_table_keys('user_info_base')
                           if k in update_info}
-        identify_info = {k: update_info.pop(k) for k in info_identify_columns
+
+        identify_info = {k: update_info.pop(k)
+                         for k in self.get_table_keys('user_info')
                          if k in update_info}
 
         if update_info:
