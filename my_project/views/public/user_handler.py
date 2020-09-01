@@ -8,6 +8,8 @@ from views.base.base_handler import HandlerBase
 
 class UserHandler(HandlerBase):
     def get(self):
+        user_info_base_ctr.session = self.db_session
+
         query_info = self.get_param_info(['user_id', 'login_name',
                                           'user_name', 'email', 'phone'],
                                          allow_empty=True)
@@ -30,6 +32,8 @@ class UserHandler(HandlerBase):
         self.flush()
 
     def post(self):
+        user_info_base_ctr.session = self.db_session
+
         user_info_base = self.get_body_info(['login_name', 'user_name',
                                              'email', 'phone', 'identify_type',
                                              'identify_code',  'identify_psw'],

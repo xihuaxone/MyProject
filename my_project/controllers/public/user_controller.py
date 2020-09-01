@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging as logger
 from controllers.base.base_controller import ControllerBase
-from models.base.base import Session
 from models.public.user_model import UserInfoBase, UserInfo
 
 
 class UserInfoBaseController(ControllerBase):
     def __init__(self):
-        super(UserInfoBaseController, self).__init__(UserInfoBase, Session())
+        super(UserInfoBaseController, self).__init__(UserInfoBase)
 
     def get(self, user_info_base, get_list=False):
         query_method = 'all' if get_list else 'one_or_none'
@@ -42,8 +41,8 @@ class UserInfoBaseController(ControllerBase):
 
 
 class UserInfoController(ControllerBase):
-    def __init__(self):
-        super(UserInfoController, self).__init__(UserInfo, Session())
+    def __init__(self, session):
+        super(UserInfoController, self).__init__(UserInfo)
 
     def get(self, user_id=None):
         info = self._get({'user_id': user_id}, query_method='one_or_none')
@@ -66,7 +65,7 @@ class UserInfoController(ControllerBase):
 
 class UserCollector(ControllerBase):
     def __init__(self):
-        super(UserCollector, self).__init__([UserInfoBase, UserInfo], Session())
+        super(UserCollector, self).__init__([UserInfoBase, UserInfo])
 
     def get(self, user_info_base):
         info = self._get(user_info_base, 'user_info')

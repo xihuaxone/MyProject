@@ -3,8 +3,14 @@ from abc import ABC
 
 import tornado.web
 
+from models.base.base import Session
+
 
 class HandlerBase(tornado.web.RequestHandler, ABC):
+    def __init__(self, *args, **kwargs):
+        self.db_session = Session()
+        super(HandlerBase, self).__init__(*args, **kwargs)
+
     def prepare(self):
         pass
 

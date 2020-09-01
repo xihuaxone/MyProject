@@ -3,14 +3,14 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 
 class ControllerBase(object):
-    def __init__(self, table_cls, session):
+    def __init__(self, table_cls):
         if isinstance(table_cls, DeclarativeMeta):
             table_cls = [table_cls]
 
         self.table_cls_map = {c.__tablename__: c
                               for c in table_cls}
         self.table_cls_map.update({'default': table_cls[0]})
-        self.session = session
+        self._session = None
 
     @staticmethod
     def format_return(success, msg='', info=None, **kwargs):
@@ -23,6 +23,18 @@ class ControllerBase(object):
     def get_table_keys(self, table_name='default'):
         return [c for c, v in self.table_cls_map[table_name].__dict__.items()
                 if isinstance(v, InstrumentedAttribute)]
+
+    @property
+    def session(self):
+        return self._session
+
+    @session.setter
+    def session(self, session):
+        self._session = session
+
+    @session.getter
+    def session(self):
+        return self._session
 
     def commit(self):
         try:
@@ -53,7 +65,7 @@ class ControllerBase(object):
 
             filter_params.append(part_filter)
 
-        query_obj = self.session.query(self.table_cls_map[table_name]).filter(*filter_params)
+        query_obj = self._session.query(self.table_cls_map[table_name]).filter(*filter_params)
         query_method = kwargs.get('query_method', 'all')
         info = getattr(query_obj, query_method)()
         if isinstance(info, list):
@@ -64,14 +76,14 @@ class ControllerBase(object):
 
     def _add(self, add_dict, table_name='default'):
         instance = self.table_cls_map[table_name](**add_dict)
-        self.session.add(instance)
+        self._session.add(instance)
         return instance.serialize()
 
     def _update(self, query_dict, update_dict, table_name='default'):
         filter_params = [getattr(self.table_cls_map[table_name], k) == v
                          for k, v in query_dict.items()]
 
-        instance_list = self.session.query(
+        instance_list = self._session.query(
             self.table_cls_map[table_name]).filter(*filter_params).all()
         for instance in instance_list:
             for k, v in update_dict.items():
