@@ -57,7 +57,7 @@ class UserCollector(ControllerBase):
         info = self._get(user_info_base, 'user_info')
         return self.format_return(True, '', info)
 
-    def update_user_info(self, user_id, update_info):
+    def update(self, user_id, update_info):
         user_base_info = {k: update_info.pop(k)
                           for k in self.get_table_keys('user_info_base')
                           if k in update_info}

@@ -36,12 +36,3 @@ class AesCrypt(object):
         aes_str = AES.new(self.key, self.mode, self.iv).decrypt(a2b_hex(base64_str))
         complete_aes_str = str(self._unpad_byte(aes_str), encoding='utf8')
         return complete_aes_str
-
-
-if __name__ == '__main__':
-    data = 'im a password'
-    pc = AesCrypt()
-    redata = pc.encrypt(data)
-    print(redata)
-    result = pc.decrypt(redata)
-    print(result)

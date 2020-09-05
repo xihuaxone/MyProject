@@ -32,16 +32,20 @@ class UserHandler(HandlerBase):
         self.flush()
 
     def post(self):
-        user_info_base_ctr.session = self.db_session
+        user_ctr.session = self.db_session
 
-        user_info_base = self.get_body_info(['login_name', 'user_name',
-                                             'email', 'phone', 'identify_type',
-                                             'identify_code',  'identify_psw'],
-                                            allow_empty=True)
+        user_info = self.get_body_info(['login_name', 'user_name',
+                                        'email', 'phone', 'identify_type',
+                                        'identify_code',  'identify_psw'],
+                                       allow_empty=True)
+        if not user_info.get('login_name'):
+            self.write(None, False, 2001, 'login_name not set.')
+            return
+
         try:
-            resp = user_info_base_ctr.add(user_info_base, action_if_exist='ignore')
+            resp = user_ctr.update(user_info, action_if_exist='ignore')
         except Exception as err:
-            logger.error('add user info failed. detail: %s'
+            logger.error('update user info failed. detail: %s'
                          % traceback.format_exc(10))
             self.write(None, success=False, code=1000, msg=str(err))
             return
@@ -101,6 +105,8 @@ class UserHandler(HandlerBase):
         try:
             success = user_ctr.delete(user_id)
         except Exception as err:
+            logger.error('delete user info failed. detail: %s'
+                         % traceback.format_exc(10))
             self.write(None, False, 1000, str(err))
             return
         if not success:
