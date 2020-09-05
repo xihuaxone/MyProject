@@ -9,3 +9,7 @@ log_level =
 
 [my_project_service]
 endpoint = {{endpoint}}
+
+[identify]
+user_login_sk = {{login_sk}}
+user_login_iv = {{login_iv}}

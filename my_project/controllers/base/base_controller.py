@@ -1,6 +1,8 @@
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
+from common.cryptodome import AesCrypt
+
 
 class ControllerBase(object):
     def __init__(self, table_cls):
@@ -90,3 +92,26 @@ class ControllerBase(object):
                 setattr(instance, k, v)
 
         return [ins.serialize() for ins in instance_list]
+
+    def _delete(self, query_dict, table_name='default'):
+        filter_params = [getattr(self.table_cls_map[table_name], k) == v
+                         for k, v in query_dict.items()]
+
+        self._session.query(self.table_cls_map[table_name]
+                            ).filter(*filter_params).delete()
+        return True
+
+
+    @staticmethod
+    def encrypt(string, crypt_type='AES'):
+        if crypt_type == 'AES':
+            return AesCrypt().encrypt(string)
+        else:
+            raise Exception('crypt_type not supported')
+
+    @staticmethod
+    def decrypt(string, crypt_type='AES'):
+        if crypt_type == 'AES':
+            return AesCrypt().decrypt(string)
+        else:
+            raise Exception('crypt_type not supported')

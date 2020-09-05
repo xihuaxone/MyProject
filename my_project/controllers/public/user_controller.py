@@ -41,26 +41,12 @@ class UserInfoBaseController(ControllerBase):
 
 
 class UserInfoController(ControllerBase):
-    def __init__(self, session):
+    def __init__(self):
         super(UserInfoController, self).__init__(UserInfo)
 
     def get(self, user_id=None):
         info = self._get({'user_id': user_id}, query_method='one_or_none')
         return self.format_return(True, '', info)
-
-    def add(self, user_info):
-        if not isinstance(user_info, dict):
-            raise Exception('param user_info is not dict.')
-        if not user_info.get('user_id'):
-            raise Exception('user_id must present.')
-
-        query_dict = {'user_id': user_info['user_id']}
-
-        if self._get(query_dict, query_method='one_or_none'):
-            raise Exception('user info exists.')
-        else:
-            info = self._add(user_info)
-            return self.format_return(True, '', info)
 
 
 class UserCollector(ControllerBase):
@@ -80,6 +66,10 @@ class UserCollector(ControllerBase):
                          for k in self.get_table_keys('user_info')
                          if k in update_info}
 
+        if identify_info.get('identify_psw', None) is not None:
+            identify_info['identify_psw'] = \
+                self.encrypt(identify_info.get('identify_psw'))
+
         if update_info:
             logger.warning('some update info not used: %s' % update_info)
 
@@ -93,16 +83,46 @@ class UserCollector(ControllerBase):
 
             info['user_info'] = self._update({'id': user_id},
                                              identify_info, 'user_info')
-            self.commit()
         except Exception as err:
             return self.format_return(False, str(err))
         return self.format_return(True, '', info)
 
-    def add(self):
-        pass
+    def add(self, add_info):
+        if not isinstance(add_info, dict):
+            raise Exception('param add_info is not dict.')
 
-    def delete(self):
-        pass
+        user_base_info = {k: add_info.pop(k)
+                          for k in self.get_table_keys('user_info_base')
+                          if k in add_info}
+
+        identify_info = {k: add_info.pop(k)
+                         for k in self.get_table_keys('user_info')
+                         if k in add_info}
+
+        if self._get(user_base_info, 'user_info_base', query_method='one_or_none'):
+            raise Exception('user info exists.')
+        info = {}
+        try:
+            info['user_info_base'] = self._add(user_base_info, 'user_info_base')
+            identify_info = self._add(identify_info, 'user_info')
+            identify_info.update({'identify_psw': '***', 'identify_code': '***'})
+            info['user_info'] = identify_info
+        except Exception as err:
+            return self.format_return(False, str(err))
+
+        return self.format_return(True, '', info)
+
+    def delete(self, user_id):
+        if not self._get({'user_id': user_id}, 'user_info_base'):
+            raise Exception('user_id not exists.')
+
+        try:
+            self._delete({'user_id': user_id}, 'user_info_base')
+            self._delete({'id': user_id}, 'user_info')
+        except Exception as err:
+            return self.format_return(False, str(err))
+
+        return self.format_return(True)
 
 
 user_info_base_ctr = UserInfoBaseController()
