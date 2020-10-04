@@ -1,13 +1,14 @@
 import json
 import os
 import requests
-from settings.global_config import Service
 
 import unittest
 
+from settings.service_settings import MyProjectService
+
 
 class TestUserHandler(unittest.TestCase):
-    url = os.path.join(Service.endpoint, 'user')
+    url = os.path.join(MyProjectService.endpoint, 'user')
 
     def test_user_post(self):
         data = {
@@ -15,7 +16,7 @@ class TestUserHandler(unittest.TestCase):
             'user_name': 'xihua2',
             'login_name': 'xihuatwo'
         }
-        res = requests.post(self.url, data=json.dumps(data), timeout=10)
+        res = requests.post(self.url, data=data, timeout=10)
         print('post resp: %s' % res.content)
 
     def test_user_get(self):

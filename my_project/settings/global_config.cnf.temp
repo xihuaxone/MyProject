@@ -1,0 +1,15 @@
+[my_project_db]
+host = {{host}}
+port = {{port}}
+user = {{user_name}}
+passwd = {{passwd}}
+db_name = my_project
+charset = utf8
+log_level =
+
+[my_project_service]
+endpoint = {{endpoint}}
+
+[identify]
+user_login_sk = {{login_sk}}
+user_login_iv = {{login_iv}}

@@ -1,0 +1,15 @@
+CREATE TABLE `user_identify` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+	`user_id` int(11) NOT NULL COMMENT '用户主键id',
+  `identify_type` int(3) NOT NULL COMMENT '登录认证方式',
+  `identify_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '登录认证code',
+  `identify_psw` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '登录认证密码',
+  `time_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `time_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `identify_keys` (`identify_type`,`identify_code`,`identify_psw`) USING HASH COMMENT '用户登录信息索引，hash索引，仅支持精准查询；',
+	KEY `user_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+drop table if exists `user_info`;
+alter table user_info_base drop COLUMN `user_id`;

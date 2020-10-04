@@ -1,72 +1,116 @@
-import json
 import traceback
 
-import tornado.web
 import logging as logger
 
-from controllers.public.user_controller import user_info_base_ctr
+from controllers.public.user_controller import user_info_base_ctr, user_ctr
+from views.base.base_handler import HandlerBase
 
 
-class UserHandler(tornado.web.RequestHandler):
+class UserHandler(HandlerBase):
     def get(self):
-        ret = {'success': True, 'code': 200, 'msg': '', 'data': None}
+        user_info_base_ctr.session = self.db_session
 
-        user_id = self.get_argument('user_id', None)
-        login_name = self.get_argument('login_name', None)
-        user_name = self.get_argument('user_name', None)
-        email = self.get_argument('email', None)
-        phone = self.get_argument('phone', None)
-
+        query_info = self.get_param_info(['user_id', 'login_name',
+                                          'user_name', 'email', 'phone'],
+                                         allow_empty=True)
         try:
-            resp = user_info_base_ctr.get(user_id, login_name, user_name, email, phone, get_list=False)
+            resp = user_info_base_ctr.get(query_info, get_list=False)
         except Exception as err:
             logger.error('get user_info_base error: %s'
                          % traceback.format_exc(10))
-            ret['success'] = False
-            ret['code'] = 1000
-            ret['msg'] = str(err)
-            self.write(ret)
+            self.write(None, success=False, code=1000, msg=str(err))
             return
 
         logger.info('query result: %s' % resp)
 
         if not resp.get('success'):
-            ret['success'] = False
-            ret['code'] = 1005
-            ret['msg'] = 'user not found.'
+            self.write(None, success=False, code=1005, msg='user not found.')
 
         else:
-            ret['info'] = resp.get('info')
+            self.write(resp.get('info'))
 
-        logger.info('request uri [%s] from host [%s] with method [%s], response: %s'
-                    % (self.request.uri, self.request.host, self.request.method, ret))
-        self.write(ret)
+        self.flush()
 
     def post(self):
-        ret = {'success': True, 'code': 200, 'msg': '', 'data': None}
+        user_ctr.session = self.db_session
 
-        user_info = json.loads(self.request.body.decode('utf-8'))
+        user_info = self.get_body_info(['login_name', 'user_name',
+                                        'email', 'phone', 'identify_type',
+                                        'identify_code',  'identify_psw'],
+                                       allow_empty=True)
+        if not user_info.get('login_name'):
+            self.write(None, False, 2001, 'login_name not set.')
+            return
 
         try:
-            resp = user_info_base_ctr.add(user_info, 'ignore')
+            resp = user_ctr.update(user_info, action_if_exist='ignore')
         except Exception as err:
-            logger.error('add user info failed. detail: %s'
+            logger.error('update user info failed. detail: %s'
                          % traceback.format_exc(10))
-            ret['success'] = False
-            ret['code'] = 1000
-            ret['msg'] = err
-            self.write(ret)
+            self.write(None, success=False, code=1000, msg=str(err))
             return
 
         if not resp.get('success'):
-            ret['success'] = False
-            ret['code'] = 1005
-            ret['msg'] = 'add user failed. detail: %s' % resp.get('msg')
-            self.write(ret)
+            msg = 'add user failed. detail: %s' % resp.get('msg')
+            self.write(None, success=False, code=1005, msg=msg)
+
             return
         else:
-            ret['info'] = resp.get('info')
+            self.write(resp.get('info'))
 
-        logger.info('request uri [%s] from host [%s] with method [%s], response: %s'
-                    % (self.request.uri, self.request.host, self.request.method, ret))
-        self.write(ret)
+        self.flush()
+
+    def put(self):
+        user_ctr.session = self.db_session
+
+        user_info = self.get_body_info(
+            ['login_name', 'user_name', 'email', 'phone'],
+            allow_empty=True)
+
+        if not user_info:
+            logger.info('user login info must input at least 1.')
+            self.write(None, False, 2001,
+                       'login_name/user_name/email/phone '
+                       'must set at least 1.')
+            return
+
+        user_info.update(self.get_body_info(
+            ['identify_type', 'identify_code',
+             'identify_psw'],
+            allow_empty=False))
+
+        try:
+            resp = user_ctr.add(user_info, action_if_exist='ignore')
+        except Exception as err:
+            logger.error('add user info failed. detail: %s'
+                         % traceback.format_exc(10))
+            self.write(None, False, 1000, str(err))
+            return
+
+        if not resp.get('success'):
+            msg = 'add user failed. detail: %s' % resp.get('msg')
+            self.write(None, False, 1005, msg)
+            return
+        else:
+            self.write(resp.get('info'))
+
+        self.flush()
+
+    def delete(self):
+        user_ctr.session = self.db_session
+
+        user_id = self.get_body_info(
+            ['user_id'], allow_empty=False)['user_id']
+
+        try:
+            success = user_ctr.delete(user_id)
+        except Exception as err:
+            logger.error('delete user info failed. detail: %s'
+                         % traceback.format_exc(10))
+            self.write(None, False, 1000, str(err))
+            return
+        if not success:
+            self.write(None, False, 1005, 'delete user failed.')
+            return
+        self.write(None)
+        self.flush()

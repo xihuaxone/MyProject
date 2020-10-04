@@ -5,13 +5,14 @@ from sqlalchemy.dialects.mysql import INTEGER, VARCHAR
 from models.base.base import Base
 
 
-class UserInfo(Base):
-    __tablename__ = 'user_info'
+class UserIdentify(Base):
+    __tablename__ = 'user_identify'
     __table_args__ = (
         Index('identify_keys', 'identify_type', 'identify_code', 'identify_psw', unique=True),
     )
 
-    id = Column(INTEGER(10), primary_key=True, comment='用户主键id')
+    id = Column(INTEGER(10), primary_key=True, comment='主键id')
+    user_id = Column(INTEGER(11), nullable=False, index=True, comment='用户主键id')
     identify_type = Column(INTEGER(3), nullable=False, comment='登录认证方式')
     identify_code = Column(VARCHAR(255), nullable=False, comment='登录认证code')
     identify_psw = Column(VARCHAR(255), nullable=False, comment='登录认证密码')
@@ -26,7 +27,6 @@ class UserInfoBase(Base):
     )
 
     id = Column(INTEGER(11), primary_key=True)
-    user_id = Column(INTEGER(11), nullable=False, comment='用户主键id，用于关联其他用户表')
     login_name = Column(String(255), nullable=False, comment='用户登录名')
     user_name = Column(String(100), nullable=False, comment='用户自定义名')
     email = Column(String(255), comment='email地址')
